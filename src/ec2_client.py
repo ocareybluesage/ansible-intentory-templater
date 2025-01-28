@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Dict, List
 
 from pydantic import BaseModel
-import boto3
+from boto3 import client, Session
 
 
 class Ec2Client:
@@ -25,8 +25,9 @@ class Ec2Client:
         return response
 
     @staticmethod
-    def new() -> Ec2Client:
-        client = boto3.client("ec2")
+    def new(profile_name: str) -> Ec2Client:
+        session = Session(profile_name=profile_name)
+        client = session.client('ec2')
         ec2_client = Ec2Client(client)
         return ec2_client
 
