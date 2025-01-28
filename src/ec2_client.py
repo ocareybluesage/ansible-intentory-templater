@@ -9,7 +9,7 @@ class Ec2Client:
     def __init__(self, client):
         self.client = client
 
-    def get_instances_by_env(self, env):
+    def get_instances_by_env(self, env) -> Ec2ClientResponse:
         response: Dict[str, str] = self.client.describe_instances(
             Filters=[
                 {
@@ -21,7 +21,8 @@ class Ec2Client:
             ],
         )
         response = Ec2ClientResponse(**response)
-        print(f"{response}")
+        
+        return response
 
     @staticmethod
     def new() -> Ec2Client:
@@ -33,8 +34,16 @@ class Ec2Client:
 class Ec2ClientResponse(BaseModel):
     Reservations: List[Reservation]
 
+    def get_instances(self) -> List[Instance]:
+        instances = [r.get_instances() for r in self.Reservations]
+        instances = [i for j in instances for i in j]
+        return instances
+
 class Reservation(BaseModel):
     Instances: List[Instance]
+
+    def get_instances(self):
+        return self.Instances
 
 class Instance(BaseModel):
     PrivateIpAddress: str
