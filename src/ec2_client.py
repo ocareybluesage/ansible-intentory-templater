@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Dict, List
 
 from pydantic import BaseModel
-from boto3 import client, Session
+from boto3 import Session
 
 
 class Ec2Client:
