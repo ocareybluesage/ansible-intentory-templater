@@ -48,3 +48,17 @@ class Reservation(BaseModel):
 class Instance(BaseModel):
     PrivateIpAddress: str
     Tags: List[Dict[str, str]]
+
+    def get_name(self) -> str:
+        return self.__parse_tags("Name")
+            
+    def get_apps(self) -> str:
+        return self.__parse_tags("Apps")
+    
+    def get_ip_address(self) -> str:
+        return self.PrivateIpAddress
+
+    def __parse_tags(self, key: str):
+        for tag in self.Tags:
+            if tag.get("Key") == key:
+                return tag.get("Value")
