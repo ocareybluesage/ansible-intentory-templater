@@ -3,16 +3,17 @@ name = "ansible-intentory-templater"
 version = "0.1.0"
 description = ""
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [tool.poetry]
 package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.9" 
+python = ">=3.10" 
 boto3 = "^1.36.7"
 invoke = "^2.2.0"
 pydantic = "^2.10.6"
+jinja2 = "^3.1.5"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

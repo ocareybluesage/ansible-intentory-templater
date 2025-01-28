@@ -52,8 +52,9 @@ class Instance(BaseModel):
     def get_name(self) -> str:
         return self.__parse_tags("Name")
             
-    def get_apps(self) -> str:
-        return self.__parse_tags("Apps")
+    def get_apps(self) -> List[str]:
+        apps = self.__parse_tags("Apps").split(",")
+        return apps
     
     def get_ip_address(self) -> str:
         return self.PrivateIpAddress
