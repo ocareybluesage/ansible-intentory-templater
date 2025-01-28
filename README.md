@@ -14,3 +14,7 @@ exit virtual environment
 ```
 deactivate
 ```
+
+### Running 
+
+running the invoke task assumes you already have already authenticated with aws
