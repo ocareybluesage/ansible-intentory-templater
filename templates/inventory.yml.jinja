@@ -15,6 +15,7 @@
         443:
           nginx_apps: {{ apps }}
     {%- endif -%}
-
-{%- endfor -%}
+{%- endfor %}
+  vars:
+    db_pwd: {{ rds_creds.get_password() }}
     
