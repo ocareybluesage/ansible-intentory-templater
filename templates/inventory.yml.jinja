@@ -21,4 +21,14 @@
 {%- endfor %}
   vars:
     db_pwd: {{ rds_creds[0].get_password() }}
-{%- endfor -%}
+{%- endfor %}
+
+{{ client }}_lower:
+  children:
+  {%- for env in envs %}
+    {{ client }}_{{ env }}:
+  {%- endfor %}
+  vars:
+    ansible_ssh_private_key_file: ../BlueSage-Terraform/bss-terraform-infrastructure/bss-lower.pem
+    cluster_path: {{ rds_creds[0].get_hostname() }}
+    aws_profile: sso-devops-bss
