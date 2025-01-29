@@ -9,14 +9,12 @@ class Ec2Client:
     def __init__(self, client):
         self.client = client
 
-    def get_instances_by_env(self, env) -> Ec2ClientResponse:
+    def get_instances_by_env(self, envs: List[str]) -> Ec2ClientResponse:
         response: Dict[str, str] = self.client.describe_instances(
             Filters=[
                 {
                     "Name": "tag:Env",
-                    "Values": [
-                        f"{env}",
-                    ],
+                    "Values": envs
                 },
             ],
         )
@@ -56,6 +54,10 @@ class Instance(BaseModel):
     def get_apps(self) -> List[str]:
         apps = self.__parse_tags("Apps").split(",")
         return apps
+    
+    @property
+    def env(self) -> str:
+        return self.__parse_tags("Env")
     
     def get_ip_address(self) -> str:
         return self.PrivateIpAddress

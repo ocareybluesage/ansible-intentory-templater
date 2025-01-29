@@ -10,13 +10,13 @@ class SsmClient:
     def __init__(self, ssm_client):
         self.ssm_client = ssm_client
 
-    def get_parameter_by_name(self, name: str, model: BaseModel) -> BaseModel:
-        response: Dict[str, str] = self.ssm_client.get_parameter(
-            Name=f"{name}", WithDecryption=True
+    def get_parameter_by_name(self, names: List[str]) -> SsmClientResponse:
+        response: Dict[str, str] = self.ssm_client.get_parameters(
+            Names=names,
+            WithDecryption=True,
         )
 
         response: SsmClientResponse = SsmClientResponse(**response)
-        response = model.model_validate_json(response.Parameter.get_value())
 
         return response
 
@@ -29,7 +29,8 @@ class SsmClient:
 
 
 class SsmClientResponse(BaseModel):
-    Parameter: Parameter
+    Parameters: List[Parameter]
+
 
 class Parameter(BaseModel):
     Name: str
@@ -38,12 +39,17 @@ class Parameter(BaseModel):
     def get_value(self) -> str:
         return self.Value
 
+
 class RdsCreds(BaseModel):
     hostname: str
     password: str
 
     def get_hostname(self) -> str:
         return self.hostname
-    
+
     def get_password(self) -> str:
         return self.password
+
+    @staticmethod
+    def get_parameter_path(client: str, env: str):
+        return f"/secrets/{client}/{env}/database/application-user"

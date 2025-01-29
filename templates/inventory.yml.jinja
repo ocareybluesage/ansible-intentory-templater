@@ -1,5 +1,7 @@
+{%- for env in envs %}
 {{ client }}_{{ env }}:
   hosts:
+{%- set instances = instances | selectattr("env", "equalto", env) -%}
 {%- for instance in instances -%}
 {% set apps = instance.get_apps() %}
     {{ instance.get_name().replace('-', '_') }}:
@@ -14,8 +16,6 @@
     {%- else %}    
         443:
           nginx_apps: {{ apps }}
-    {%- endif -%}
-{%- endfor %}
-  vars:
-    db_pwd: {{ rds_creds.get_password() }}
-    
+    {% endif -%}
+{%- endfor -%}
+{%- endfor -%}

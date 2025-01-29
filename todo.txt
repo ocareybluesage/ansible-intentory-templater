@@ -1,0 +1,4 @@
+split template to prod and lower
+add activemq logic stuff to template
+add docs strings for invoke task param usage
+validate env list (trailing comma and if they pass spaces)
