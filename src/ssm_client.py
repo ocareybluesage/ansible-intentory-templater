@@ -15,7 +15,6 @@ class SsmClient:
             Names=names,
             WithDecryption=True,
         )
-
         response: SsmClientResponse = SsmClientResponse(**response)
 
         return response
@@ -43,12 +42,17 @@ class Parameter(BaseModel):
 class RdsCreds(BaseModel):
     hostname: str
     password: str
+    username: str
 
     def get_hostname(self) -> str:
         return self.hostname
 
     def get_password(self) -> str:
         return self.password
+    
+    @property
+    def env(self) -> str:
+        return self.username.split("_")[-1]
 
     @staticmethod
     def get_parameter_path(client: str, env: str):
