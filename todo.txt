@@ -1,4 +1,9 @@
-split template to prod and lower
+ask about nginx split and differences between prod and lower
+    - add ssm_resource to apps module in terraform importable modules
+
 add activemq logic stuff to template
-add docs strings for invoke task param usage
-validate env list (trailing comma and if they pass spaces)
+
+add docs strings for invoke task param usage    
+update 02/03 files with new children(?)
+
+add note about reading secrets at runtime instead of hard coding inside ansible playbook

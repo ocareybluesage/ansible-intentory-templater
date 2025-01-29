@@ -55,5 +55,5 @@ class RdsCreds(BaseModel):
         return self.username.split("_")[-1]
 
     @staticmethod
-    def get_parameter_path(client: str, env: str):
-        return f"/secrets/{client}/{env}/database/application-user"
+    def get_parameter_path(client_name: str, env: str):
+        return f"/secrets/{client_name}/{env}/database/application-user"

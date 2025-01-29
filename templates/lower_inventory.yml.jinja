@@ -1,5 +1,5 @@
 {%for env in envs %}
-{{ client }}_{{ env }}:
+{{ client_name }}_{{ env }}:
   hosts:
 {%- set instances = instances | selectattr("env", "equalto", env) -%}
 {%- set rds_creds = rds_creds | selectattr("env", "equalto", env) | list -%}
@@ -23,10 +23,10 @@
     db_pwd: {{ rds_creds[0].get_password() }}
 {%- endfor %}
 
-{{ client }}_lower:
+{{ client_name }}_lower:
   children:
   {%- for env in envs %}
-    {{ client }}_{{ env }}:
+    {{ client_name }}_{{ env }}:
   {%- endfor %}
   vars:
     ansible_ssh_private_key_file: {{ ssh_private_key_file_path }}
