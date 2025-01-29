@@ -11,12 +11,12 @@ def foo(
     _,
     envs: str,
     client: str,
+    output_file_path: str = "inventory/foo.yml",
     client_aws_profile: str = "it-devops-bss",
     bss_devops_aws_profile: str = "it-devops-bss-devops",
     ssh_private_key_file_path: str = "../BlueSage-Terraform/bss-terraform-infrastructure/bss-lower.pem"
 ):
     envs = envs.split(",")
-    templater: Templater = Templater.new(template_path="templates/inventory.yml.jinja")
     ec2_client: Ec2Client = Ec2Client.new(profile_name=client_aws_profile)
     ssm_client: SsmClient = SsmClient.new(profile_name=bss_devops_aws_profile)
 
@@ -35,6 +35,7 @@ def foo(
     ]
     instances: List[Instance] = ec2_response.get_instances()
 
+    templater: Templater = Templater.new(template_path="templates/inventory.yml.jinja")
     template_data = {
         "envs": envs,
         "client": client,
@@ -43,4 +44,6 @@ def foo(
         "client_aws_profile": client_aws_profile,
         "ssh_private_key_file_path": ssh_private_key_file_path
     }
-    templater.render(template_data=template_data)
+
+    rendered_template = templater.render(template_data=template_data)
+    templater.write_template(rendered_template=rendered_template, output_file_path=output_file_path)

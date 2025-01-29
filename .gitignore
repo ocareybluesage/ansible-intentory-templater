@@ -1,5 +1,7 @@
 .venv/
 .python-version
+inventory/*.yml
+inventory/*.yaml
 
 foo.json
 01-bss-lower.yml

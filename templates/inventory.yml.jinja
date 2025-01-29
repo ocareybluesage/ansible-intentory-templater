@@ -1,4 +1,4 @@
-{%- for env in envs %}
+{%for env in envs %}
 {{ client }}_{{ env }}:
   hosts:
 {%- set instances = instances | selectattr("env", "equalto", env) -%}
