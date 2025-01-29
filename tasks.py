@@ -7,11 +7,18 @@ from src.templater import Templater
 
 # envs is comma deliniated list of environments
 @task
-def foo(_, envs: str, client: str):
+def foo(
+    _,
+    envs: str,
+    client: str,
+    client_aws_profile: str = "it-devops-bss",
+    bss_devops_aws_profile: str = "it-devops-bss-devops",
+    ssh_private_key_file_path: str = "../BlueSage-Terraform/bss-terraform-infrastructure/bss-lower.pem"
+):
     envs = envs.split(",")
     templater: Templater = Templater.new(template_path="templates/inventory.yml.jinja")
-    ec2_client: Ec2Client = Ec2Client.new(profile_name="it-devops-bss")
-    ssm_client: SsmClient = SsmClient.new(profile_name="it-devops-bss-devops")
+    ec2_client: Ec2Client = Ec2Client.new(profile_name=client_aws_profile)
+    ssm_client: SsmClient = SsmClient.new(profile_name=bss_devops_aws_profile)
 
     ec2_response: Ec2ClientResponse = ec2_client.get_instances_by_env(envs=envs)
 
@@ -33,5 +40,7 @@ def foo(_, envs: str, client: str):
         "client": client,
         "instances": instances,
         "rds_creds": rds_creds,
+        "client_aws_profile": client_aws_profile,
+        "ssh_private_key_file_path": ssh_private_key_file_path
     }
     templater.render(template_data=template_data)
