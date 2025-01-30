@@ -11,19 +11,19 @@ class Templater:
         rendered_template = self.template.render(template_data)
         return rendered_template
     
-    def write_template(self, rendered_template: str, client_name):
+    def write_template(self, rendered_template: str, client_code):
 
-        output_file_path = self.get_output_file_path(client_name=client_name)
+        output_file_path = self.get_output_file_path(client_code=client_code)
         
         with open(output_file_path, "w") as f:
             f.write(rendered_template)
     
-    def get_output_file_path(self, client_name: str):
+    def get_output_file_path(self, client_code: str):
 
         stage = self.config.get_stage()
         output_dir = self.config.get_output_directory()
 
-        return f"{output_dir}/{stage}/01-{client_name}.yml"
+        return f"{output_dir}/{stage}/01-{client_code}.yml"
 
     @staticmethod
     def new(config: Config):

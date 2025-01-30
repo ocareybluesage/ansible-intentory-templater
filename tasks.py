@@ -7,16 +7,25 @@ from src.templater import Templater
 from src.inventory_group import update_inventory_group
 
 
-# envs is comma deliniated list of environments
 @task
 def template(
     _,
     envs: str,
-    client_name: str,
+    client_code: str,
     client_aws_profile: str = "it-devops-bss",
     bss_devops_aws_profile: str = "it-devops-bss-devops",
     ssh_private_key_file_path: str = "../BlueSage-Terraform/bss-terraform-infrastructure/bss-lower.pem",
 ):
+    """
+    Templates out ansible inventory yaml configuration file
+
+    Args:
+        envs: A comma delinatied list of environments. Cannot include spaces. Ex: dev,qa,uat,foo,bar
+        client_code: client code corresponding to client infrasture you want to configure using ansible
+        client_aws_profile: name of aws profile that points to aws client account 
+        bss_devops_aws_profile: name of aws profile that points to aws bss-devops account 
+        ssh_private_key_file_path: file path to .pem keys which can be used to ssh into the host ec2 instances
+    """
     config = Config.new(environments=envs)
     environments = config.get_environments()
 
@@ -28,7 +37,7 @@ def template(
     )
 
     parameter_names = [
-        RdsCreds.get_parameter_path(client_name=client_name, env=env)
+        RdsCreds.get_parameter_path(client_code=client_code, env=env)
         for env in environments
     ]
     ssm_response: SsmClientResponse = ssm_client.get_parameter_by_name(
@@ -43,7 +52,7 @@ def template(
 
     template_data = {
         "envs": environments,
-        "client_name": client_name,
+        "client_code": client_code,
         "instances": instances,
         "rds_creds": rds_creds,
         "client_aws_profile": client_aws_profile,
@@ -53,7 +62,7 @@ def template(
     templater: Templater = Templater.new(config=config)
     rendered_template = templater.render(template_data=template_data)
     templater.write_template(
-        rendered_template=rendered_template, client_name=client_name
+        rendered_template=rendered_template, client_code=client_code
     )
 
-    update_inventory_group(config=config, client_name=client_name)
+    update_inventory_group(config=config, client_code=client_code)

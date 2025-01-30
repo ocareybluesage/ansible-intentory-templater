@@ -3,7 +3,3 @@ ask about nginx split and differences between prod and lower
         - read that in this templater and populate template
 
 add activemq logic stuff to template
-add docs strings for invoke task param usage    
-
-
-add note about reading secrets at runtime instead of hard coding inside ansible playbook

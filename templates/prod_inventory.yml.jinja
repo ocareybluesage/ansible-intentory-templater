@@ -1,5 +1,5 @@
 {%for env in envs %}
-{{ client_name }}_{{ env }}:
+{{ client_code }}_{{ env }}:
   hosts:
 {%- set instances = instances | selectattr("env", "equalto", env) -%}
 {%- set rds_creds = rds_creds | selectattr("env", "equalto", env) | list -%}

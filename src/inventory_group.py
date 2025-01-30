@@ -2,7 +2,7 @@ import yaml
 
 from src import Config
 
-def update_inventory_group(config: Config, client_name: str):
+def update_inventory_group(config: Config, client_code: str):
 
     stage = config.get_stage()
     environments = config.get_environments()
@@ -10,7 +10,7 @@ def update_inventory_group(config: Config, client_name: str):
     
     for env in environments:
         file_path = f"./{output_dir}/{stage}/02-{env}.yml"
-        update_yaml_file(file_path=file_path, parent_key=env, key=f"{client_name}_{env}")
+        update_yaml_file(file_path=file_path, parent_key=env, key=f"{client_code}_{env}")
 
         if not config.is_prod():
             file_path = f"./{output_dir}/lower/03-lower.yml"
