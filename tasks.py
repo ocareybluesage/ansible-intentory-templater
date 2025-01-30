@@ -3,6 +3,7 @@ from invoke import task
 from src.ec2_client import Ec2Client, Ec2ClientResponse, Instance
 from src.ssm_client import SsmClient, SsmClientResponse, RdsCreds
 from src.templater import Templater
+from src.inventory_group import update_inventory_group
 
 
 # envs is comma deliniated list of environments
@@ -11,7 +12,6 @@ def template(
     _,
     envs: str,
     client_name: str,
-    output_directory: str = "inventory/",
     client_aws_profile: str = "it-devops-bss",
     bss_devops_aws_profile: str = "it-devops-bss-devops",
     ssh_private_key_file_path: str = "../BlueSage-Terraform/bss-terraform-infrastructure/bss-lower.pem"
@@ -46,7 +46,9 @@ def template(
     }
 
     rendered_template = templater.render(template_data=template_data)
-    templater.write_template(rendered_template=rendered_template, output_directory=output_directory)
+    templater.write_template(rendered_template=rendered_template, client_name=client_name)
+
+    update_inventory_group(envs, client_name=client_name)
 
 def parse_envs(envs: str) -> List[str]:
     return [e for e in envs.strip().split(",") if e != ""]
