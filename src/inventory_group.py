@@ -16,6 +16,17 @@ def update_inventory_group(environments: List[str], client_name: str):
             data[env]["children"][f"{client_name}_{env}"] = None
 
         with open(file_path, "w", encoding='utf-8') as f:
-            yaml.dump(data, f, )
+            yaml.dump(data, f)
+
+    if not is_prod(environments):
+        file_path = f"./{OUTPUT_DIR}/lower/03-lower.yml"
+
+        for env in environments:
+            with open(file_path, "r") as f:
+                data = yaml.full_load(f)
+                data["lower"]["children"][env] = None
+
+            with open(file_path, "w", encoding='utf-8') as f:
+                yaml.dump(data, f)
 
     
