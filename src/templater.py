@@ -1,10 +1,11 @@
-from typing import Dict, List
+from typing import Dict
 from jinja2 import Environment, FileSystemLoader, Template
-from src import OUTPUT_DIR, is_prod
+from src import Config
 
 class Templater:
-    def __init__(self, template: Template):
+    def __init__(self, template: Template, config: Config):
         self.template: Template = template
+        self.config: Config = config
 
     def render(self, template_data: Dict[str, str]) -> str:
         rendered_template = self.template.render(template_data)
@@ -19,23 +20,17 @@ class Templater:
     
     def get_output_file_path(self, client_name: str):
 
-        env = "lower"
-        if "prod" in self.template.filename:
-            env = "prod"
+        stage = self.config.get_stage()
+        output_dir = self.config.get_output_directory()
 
-        output_file_path = f"{OUTPUT_DIR}/{env}/01-{client_name}.yml"
-
-        return output_file_path
+        return f"{output_dir}/{stage}/01-{client_name}.yml"
 
     @staticmethod
-    def new(environments: List[str]):
-        env = "lower"
-        if is_prod(environments):
-            env = "prod"
-
-        template_path = f"templates/{env}_inventory.yml.jinja"
+    def new(config: Config):
+        stage = config.get_stage()
+        template_path = f"templates/{stage}_inventory.yml.jinja"
         environment = Environment(loader=FileSystemLoader('./'))
         template: Template = environment.get_template(template_path)
 
-        return Templater(template=template)
+        return Templater(template=template, config=config)
 

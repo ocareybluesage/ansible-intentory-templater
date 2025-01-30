@@ -9,12 +9,12 @@ class Ec2Client:
     def __init__(self, client):
         self.client = client
 
-    def get_instances_by_env(self, envs: List[str]) -> Ec2ClientResponse:
+    def get_instances_by_environment(self, environments: List[str]) -> Ec2ClientResponse:
         response: Dict[str, str] = self.client.describe_instances(
             Filters=[
                 {
                     "Name": "tag:Env",
-                    "Values": envs
+                    "Values": environments
                 },
             ],
         )

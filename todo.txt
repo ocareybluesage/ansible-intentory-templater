@@ -2,10 +2,8 @@ ask about nginx split and differences between prod and lower
     - add ssm_resource to apps module in terraform importable modules which will hold nginx stuff
         - read that in this templater and populate template
 
-update 02/03 files with new children(?)
 add activemq logic stuff to template
 add docs strings for invoke task param usage    
 
-if there is time, refactor to use a config object so you dont need to pass around is_prod and environements and output dir...
 
 add note about reading secrets at runtime instead of hard coding inside ansible playbook

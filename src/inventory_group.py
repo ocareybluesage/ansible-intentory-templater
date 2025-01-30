@@ -1,32 +1,26 @@
-from typing import List
 import yaml
 
-from src import OUTPUT_DIR, is_prod
+from src import Config
 
-def update_inventory_group(environments: List[str], client_name: str):
+def update_inventory_group(config: Config, client_name: str):
 
-    stage = "lower"
-    if is_prod(environments):
-        stage = "prod"
+    stage = config.get_stage()
+    environments = config.get_environments()
+    output_dir = config.get_output_directory()
     
     for env in environments:
-        file_path = f"./{OUTPUT_DIR}/{stage}/02-{env}.yml"
-        with open(file_path, "r") as f:
-            data = yaml.full_load(f)
-            data[env]["children"][f"{client_name}_{env}"] = None
+        file_path = f"./{output_dir}/{stage}/02-{env}.yml"
+        update_yaml_file(file_path=file_path, parent_key=env, key=f"{client_name}_{env}")
 
-        with open(file_path, "w", encoding='utf-8') as f:
-            yaml.dump(data, f)
-
-    if not is_prod(environments):
-        file_path = f"./{OUTPUT_DIR}/lower/03-lower.yml"
-
-        for env in environments:
-            with open(file_path, "r") as f:
-                data = yaml.full_load(f)
-                data["lower"]["children"][env] = None
-
-            with open(file_path, "w", encoding='utf-8') as f:
-                yaml.dump(data, f)
-
+        if not config.is_prod():
+            file_path = f"./{output_dir}/lower/03-lower.yml"
+            update_yaml_file(file_path=file_path, parent_key="lower", key=env)
     
+def update_yaml_file(file_path: str, parent_key: str, key: str):
+    
+    with open(file_path, "r") as f:
+        data = yaml.full_load(f)
+        data[parent_key]["children"][key] = None
+
+    with open(file_path, "w", encoding='utf-8') as f:
+        yaml.dump(data, f)
