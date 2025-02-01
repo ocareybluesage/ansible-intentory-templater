@@ -10,14 +10,23 @@ class SsmClient:
     def __init__(self, ssm_client):
         self.ssm_client = ssm_client
 
-    def get_parameter_by_name(self, names: List[str]) -> SsmClientResponse:
+    def get_parameters_by_name(self, names: List[str]) -> GetParametersResponse:
         response: Dict[str, str] = self.ssm_client.get_parameters(
             Names=names,
             WithDecryption=True,
         )
-        response: SsmClientResponse = SsmClientResponse(**response)
 
-        return response
+        return GetParametersResponse(**response)
+    
+    def get_resource_tags(self, resource_id: str) -> GetResourceTagsResponse:
+        response = self.ssm_client.list_tags_for_resource(ResourceType="Parameter", ResourceId=resource_id)
+        
+        return GetResourceTagsResponse(**response)
+    
+    def update_client_profile(self, profile_name: str):
+        session = Session(profile_name=profile_name)
+        ssm_client = session.client("ssm")
+        self.ssm_client = ssm_client        
 
     @staticmethod
     def new(profile_name: str) -> SsmClient:
@@ -27,7 +36,7 @@ class SsmClient:
         return SsmClient(ssm_client)
 
 
-class SsmClientResponse(BaseModel):
+class GetParametersResponse(BaseModel):
     Parameters: List[Parameter]
 
 
@@ -37,6 +46,9 @@ class Parameter(BaseModel):
 
     def get_value(self) -> str:
         return self.Value
+    
+    def get_name(self) -> str:
+        return self.Name
 
 
 class RdsCreds(BaseModel):
@@ -57,3 +69,23 @@ class RdsCreds(BaseModel):
     @staticmethod
     def get_parameter_path(client_code: str, env: str):
         return f"/secrets/{client_code}/{env}/database/application-user"
+
+class GetResourceTagsResponse(BaseModel):
+    TagList: List[Dict[str, str]]
+
+class NginxPortMapping(BaseModel):
+    Value: str
+    _env: str
+
+    def update_tags(self, tags: GetResourceTagsResponse):
+        for tag in tags.TagList:
+            if tag.get("Key") == "environment":
+                self._env = tag.get("Value")
+
+    @property
+    def env(self) -> str:
+        return self._env
+    
+    @staticmethod
+    def get_parameter_path(client_code: str, env: str, server_name: str):
+        return f"/nginx/{client_code}/{env}/{server_name}/ports"

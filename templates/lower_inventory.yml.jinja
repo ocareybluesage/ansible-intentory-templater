@@ -31,4 +31,4 @@
   vars:
     ansible_ssh_private_key_file: {{ ssh_private_key_file_path }}
     cluster_path: {{ rds_creds[0].get_hostname() }}
-    aws_profile: {{ client_aws_profile }}
+    aws_profile: {{ client_account_aws_profile }}
