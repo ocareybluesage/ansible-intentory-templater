@@ -3,6 +3,7 @@ from typing import Dict, List
 
 from pydantic import BaseModel
 from boto3 import Session
+import json
 
 
 class SsmClient:
@@ -80,6 +81,18 @@ class NginxPortMapping(BaseModel):
 
     def update_tags(self, tags: GetResourceTagsResponse):
         self._tags = tags.TagList
+
+    def mappings(self) -> Dict[int, List[str]]:
+        mappings: Dict[int, List[str]] = {}
+        values: Dict[str, int] = json.loads(self.Value)
+
+        for (app, port) in values.items():
+            if mappings.get(port):
+                mappings[port].append(app)
+            else: 
+                mappings[port] = [app]
+
+        return mappings
 
     @property
     def env(self) -> str:

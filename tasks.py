@@ -42,6 +42,7 @@ def template(
         "client_code": client_code,
         "instances": instances,
         "rds_creds": rds_creds,
+        "nginx_port_mapping": nginx_port_mapping,
         "client_account_aws_profile": client_account_aws_profile,
         "ssh_private_key_file_path": ssh_private_key_file_path,
     }

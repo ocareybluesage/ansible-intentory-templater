@@ -1,5 +1,1 @@
-ask about nginx split and differences between prod and lower
-    - add ssm_resource to apps module in terraform importable modules which will hold nginx stuff
-        - read that in this templater and populate template
-
 add activemq logic stuff to template
