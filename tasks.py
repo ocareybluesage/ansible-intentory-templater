@@ -35,14 +35,14 @@ def template(
 
     rds_creds: List[RdsCreds] = get_rds_creds(ssm_client=ssm_client, config=config)
     ssm_client.update_client_profile(profile_name=client_account_aws_profile)
-    nginx_port_mapping: List[NginxPortMapping] = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=instances)
+    nginx_port_mappings: List[NginxPortMapping] = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=instances)
 
     template_data = {
         "environments": config.get_environments(),
         "client_code": client_code,
         "instances": instances,
         "rds_creds": rds_creds,
-        "nginx_port_mapping": nginx_port_mapping,
+        "nginx_port_mappings": nginx_port_mappings,
         "client_account_aws_profile": client_account_aws_profile,
         "ssh_private_key_file_path": ssh_private_key_file_path,
     }

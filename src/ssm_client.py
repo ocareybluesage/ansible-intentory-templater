@@ -96,8 +96,15 @@ class NginxPortMapping(BaseModel):
 
     @property
     def env(self) -> str:
+        return self.__process_tag(key="environment")
+    
+    @property
+    def instance_name(self) -> str:
+        return self.__process_tag(key="instance_name")
+            
+    def __process_tag(self, key: str):
         for tag in self._tags:
-            if tag.get("Key") == "environment":
+            if tag.get("Key") == "instance_name":
                 return tag.get("Value")
     
     @staticmethod
