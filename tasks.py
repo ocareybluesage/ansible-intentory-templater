@@ -31,29 +31,28 @@ def template(
     ec2_client: Ec2Client = Ec2Client.new(profile_name=client_account_aws_profile)
     ssm_client: SsmClient = SsmClient.new(profile_name=bss_devops_account_aws_profile)
 
-    instances = get_ec2_instances(ec2_client=ec2_client, config=config)
+    instances: List[Instance] = get_ec2_instances(ec2_client=ec2_client, config=config)
 
-    # rds_creds: List[RdsCreds] = get_rds_creds(ssm_client=ssm_client, config=config)
+    rds_creds: List[RdsCreds] = get_rds_creds(ssm_client=ssm_client, config=config)
     ssm_client.update_client_profile(profile_name=client_account_aws_profile)
-    nginx_port_mapping = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=instances)
+    nginx_port_mapping: List[NginxPortMapping] = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=instances)
 
+    template_data = {
+        "environments": config.get_environments(),
+        "client_code": client_code,
+        "instances": instances,
+        "rds_creds": rds_creds,
+        "client_account_aws_profile": client_account_aws_profile,
+        "ssh_private_key_file_path": ssh_private_key_file_path,
+    }
 
-    # template_data = {
-    #     "envs": environments,
-    #     "client_code": client_code,
-    #     "instances": instances,
-    #     "rds_creds": rds_creds,
-    #     "client_account_aws_profile": client_account_aws_profile,
-    #     "ssh_private_key_file_path": ssh_private_key_file_path,
-    # }
+    templater: Templater = Templater.new(config=config)
+    rendered_template = templater.render(template_data=template_data)
+    templater.write_template(
+        rendered_template=rendered_template, client_code=client_code
+    )
 
-    # templater: Templater = Templater.new(config=config)
-    # rendered_template = templater.render(template_data=template_data)
-    # templater.write_template(
-    #     rendered_template=rendered_template, client_code=client_code
-    # )
-
-    # update_inventory_group(config=config, client_code=client_code)
+    update_inventory_group(config=config, client_code=client_code)
 
 def get_ec2_instances(ec2_client: Ec2Client, config: Config) -> List[Instance]:
     ec2_response: Ec2ClientResponse = ec2_client.get_instances_by_environment(

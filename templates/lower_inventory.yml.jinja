@@ -1,4 +1,4 @@
-{%for env in envs %}
+{%for env in environments %}
 {{ client_code }}_{{ env }}:
   hosts:
 {%- set instances = instances | selectattr("env", "equalto", env) -%}
@@ -25,7 +25,7 @@
 
 {{ client_code }}_lower:
   children:
-  {%- for env in envs %}
+  {%- for env in environments %}
     {{ client_code }}_{{ env }}:
   {%- endfor %}
   vars:

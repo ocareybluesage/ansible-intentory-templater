@@ -75,16 +75,17 @@ class GetResourceTagsResponse(BaseModel):
 
 class NginxPortMapping(BaseModel):
     Value: str
+    _tags: List[Dict[str, str]]
     _env: str
 
     def update_tags(self, tags: GetResourceTagsResponse):
-        for tag in tags.TagList:
-            if tag.get("Key") == "environment":
-                self._env = tag.get("Value")
+        self._tags = tags.TagList
 
     @property
     def env(self) -> str:
-        return self._env
+        for tag in self._tags:
+            if tag.get("Key") == "environment":
+                return tag.get("Value")
     
     @staticmethod
     def get_parameter_path(client_code: str, env: str, server_name: str):
