@@ -1,0 +1,10 @@
+- name: Get License Key from SSM
+  delegate_to: localhost
+  shell: |
+    LICENSE_KEY=$(aws ssm get-parameter --name /secrets/new_relic/{{ client }}/license_key --with-decryption)
+  register: test_output
+
+- name: Printout put
+  delegate_to: localhost
+  debug:
+    msg: "output {{ test_output.stdout }}"

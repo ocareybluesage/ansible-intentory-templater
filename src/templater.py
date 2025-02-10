@@ -28,7 +28,7 @@ class Templater:
     @staticmethod
     def new(config: Config):
         stage = config.get_stage()
-        template_path = f"templates/{stage}_inventory.yml.jinja"
+        template_path = f"templates/inventory/{stage}.yml.jinja"
         environment = Environment(loader=FileSystemLoader('./'))
         template: Template = environment.get_template(template_path)
 
