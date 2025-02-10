@@ -104,7 +104,7 @@ class NginxPortMapping(BaseModel):
             
     def __process_tag(self, key: str):
         for tag in self._tags:
-            if tag.get("Key") == "instance_name":
+            if tag.get("Key") == key:
                 return tag.get("Value")
     
     @staticmethod

@@ -14,8 +14,12 @@ class Ec2Client:
             Filters=[
                 {
                     "Name": "tag:Env",
-                    "Values": environments
+                    "Values": environments,
                 },
+                {
+                    "Name": "instance-state-name",
+                    "Values": ["running"]
+                }
             ],
         )
         response = Ec2ClientResponse(**response)

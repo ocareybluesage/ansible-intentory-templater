@@ -11,7 +11,7 @@
       nginx:
       {%- for (port, apps) in nginx_ports[0].mappings().items() %}
         {{ port }}: 
-          apps: {{ apps }}
+          nginx_apps: {{ apps }}
       {%- endfor %}
 {%- endfor %}
   vars:
