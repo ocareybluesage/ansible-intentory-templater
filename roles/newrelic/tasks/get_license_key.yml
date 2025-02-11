@@ -1,7 +1,14 @@
-- name: Get License Key from SSM
+- name: Get Client License Key from SSM
   delegate_to: localhost
   shell: |
-    LICENSE_KEY=$(aws ssm get-parameter --name /secrets/new_relic/{{ client }}/license_key --with-decryption)
+    LICENSE_KEY_OUTPUT=$(aws ssm get-parameter --name /secrets/new_relic/account_id --with-decryption --query "Parameter.Value" --output text)
+
+    if [ -n "$LICENSE_KEY_OUTPUT" ]; then 
+      echo "$LICENSE_KEY_OUTPUT"
+    else 
+      echo License Key not found in AWS SSM
+      echo Generating License Key for {{ client }}...
+    fi
   register: test_output
 
 - name: Printout put
