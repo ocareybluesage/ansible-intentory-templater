@@ -4,20 +4,36 @@
     API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text)
     echo $API_KEY
   register: get_api_key_output
-- name: Check for New Relic Group
+
+- name: Query New Relic Groups
   delegate_to: localhost
   shell: |
-    FOO=$(curl https://api.newrelic.com/graphql \
+    GROUP_OUTPUT=$(curl https://api.newrelic.com/graphql \
       -H 'Content-Type: application/json' \
       -H 'API-Key: {{ get_api_key_output.stdout }}' \
-      --data-binary '{"query":"{\n  actor {\n    organization {\n      userManagement {\n        authenticationDomains(id: \"0f4dda55-888e-4f4d-abba-ac7b3417faba\") {\n          authenticationDomains {\n            groups {\n              groups {\n                displayName\n                id\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}", "variables":""}')
-    echo $FOO
-  register: test_output
+      --data-binary '{
+                        "query": "{actor {organization {userManagement {authenticationDomains(id: \"0f4dda55-888e-4f4d-abba-ac7b3417faba\") {authenticationDomains {groups {groups {displayName id } } } } } } }}",
+                        "variables": ""
+                    }'
+    )
+    echo $GROUP_OUTPUT
+  register: query_new_relic_groups
+
+- name: Set Group Output as Fact
+  set_fact:
+    group_output: "{{ query_new_relic_groups.stdout | from_json }}"
+
+- name: Create ClientAccountManagement Group if does not exist
+  delegate_to: localhost
+  shell: |
+    CHECK=$(echo '{{ group_output | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups' )
+    echo $CHECK
+  register: foo
 
 - name: Printout put
   delegate_to: localhost
   debug:
-    msg: "output {{ test_output.stdout }}"
+    msg: "output {{ foo.stdout }}"
 
 # - name: Get Client License Key from SSM
 #   delegate_to: localhost
