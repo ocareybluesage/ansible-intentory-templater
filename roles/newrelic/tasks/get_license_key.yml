@@ -1,17 +1,38 @@
-- name: Get Client License Key from SSM
+- name: Get New Relic Service Account Key
   delegate_to: localhost
   shell: |
-    LICENSE_KEY_OUTPUT=$(aws ssm get-parameter --name /secrets/new_relic/account_id --with-decryption --query "Parameter.Value" --output text)
-
-    if [ -n "$LICENSE_KEY_OUTPUT" ]; then 
-      echo "$LICENSE_KEY_OUTPUT"
-    else 
-      echo License Key not found in AWS SSM
-      echo Generating License Key for {{ client }}...
-    fi
+    API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text)
+    echo $API_KEY
+  register: get_api_key_output
+- name: Check for New Relic Group
+  delegate_to: localhost
+  shell: |
+    FOO=$(curl https://api.newrelic.com/graphql \
+      -H 'Content-Type: application/json' \
+      -H 'API-Key: {{ get_api_key_output.stdout }}' \
+      --data-binary '{"query":"{\n  actor {\n    organization {\n      userManagement {\n        authenticationDomains(id: \"0f4dda55-888e-4f4d-abba-ac7b3417faba\") {\n          authenticationDomains {\n            groups {\n              groups {\n                displayName\n                id\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}", "variables":""}')
+    echo $FOO
   register: test_output
 
 - name: Printout put
   delegate_to: localhost
   debug:
     msg: "output {{ test_output.stdout }}"
+
+# - name: Get Client License Key from SSM
+#   delegate_to: localhost
+#   shell: |
+#     LICENSE_KEY=$(aws ssm get-parameter --name /secrets/new_relic/account_id --with-decryption --query "Parameter.Value" --output text)
+
+#     if [ -n "$LICENSE_KEY" ]; then 
+#       echo "$LICENSE_KEY"
+#     else 
+#       echo License Key not found in AWS SSM
+#       echo Generating License Key for {{ client }}...
+#     fi
+#   register: test_output
+
+# - name: Printout put
+#   delegate_to: localhost
+#   debug:
+#     msg: "output {{ test_output.stdout }}"
