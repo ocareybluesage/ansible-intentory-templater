@@ -1,3 +1,5 @@
+# create var for authentication domain id
+
 - name: Get New Relic Service Account Key
   delegate_to: localhost
   shell: |
@@ -26,8 +28,22 @@
 - name: Create ClientAccountManagement Group if does not exist
   delegate_to: localhost
   shell: |
-    CHECK=$(echo '{{ group_output | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups' )
-    echo $CHECK
+    CHECK=$(echo '{{ group_output | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups' | grep ClientAccountManagement)
+
+    if [ -z "$CHECK" ]; then
+      echo ClientAccountManagement group not found.
+      echo Creating ClientAccountManagement group...
+      curl https://api.newrelic.com/graphql \
+        -H 'Content-Type: application/json' \
+        -H 'API-Key: {{ get_api_key_output.stdout }}' \
+        --data-binary '{
+                          "query": "mutation {userManagementCreateGroup(createGroupOptions: {authenticationDomainId: \"0f4dda55-888e-4f4d-abba-ac7b3417faba\" displayName: \"ClientAccountManagement\" }) {group {displayName id}}}",
+                          "variables": ""
+                      }'
+    else 
+      echo ClientAccountManagement group exists!
+    fi
+
   register: foo
 
 - name: Printout put
