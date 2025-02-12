@@ -7,5 +7,3 @@
     - name: Install New Relic Java Agent
       include_role:
         name: newrelic
-      vars:
-        client: sup

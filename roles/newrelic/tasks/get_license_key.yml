@@ -1,9 +1,7 @@
-- name: Set Variables
-  set_fact: 
-    authentication_domain_id: 0f4dda55-888e-4f4d-abba-ac7b3417faba
-    client_management_group_name: ClientAccountManagement
-    # change this to be bss dev user id (currently is Omars user id)
-    service_account_user_id: 1006596928
+- name: Set Varialbes
+  set_fact:
+    all_product_admin_role_id: 1254 
+    client: move
 
 - name: Get New Relic Service Account Key
   delegate_to: localhost
@@ -12,86 +10,49 @@
     echo $API_KEY
   register: get_api_key_output
 
-- name: Query New Relic Groups
+- name: Get Client Account Metadata
   delegate_to: localhost
   shell: |
-    QUERY_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
+    QUERY_ACCOUNT_RESPONSE=$(curl https://api.newrelic.com/graphql \
       -H 'Content-Type: application/json' \
       -H 'API-Key: {{ get_api_key_output.stdout }}' \
       --data-binary '{
-                      "query": "{actor {organization {userManagement {authenticationDomains(id: \"{{ authentication_domain_id }}\") {authenticationDomains {groups {groups {displayName id users {users {name id}}}}}}}}}}",
-                      "variables": ""
+                        "query": "{actor {organization {accountManagement {managedAccounts(isCanceled: false) {name id}}}}}",
+                        "variables": ""
                     }'
     )
-    echo $QUERY_GROUP_RESPONSE
-  register: query_new_relic_groups
 
-- name: Set Query Group as Fact
-  set_fact:
-    query_group: "{{ query_new_relic_groups.stdout | from_json }}"
+    CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client}}")')
 
-- name: Create client_management_group_name Group if does not exist
-  delegate_to: localhost
-  shell: |
-    CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}")')
-
-    if [ -z "$CLIENT_MANAGEMENT_GROUP" ]; then
-      # create group if does not exist
-      CREATE_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
-        -H 'Content-Type: application/json' \
-        -H 'API-Key: {{ get_api_key_output.stdout }}' \
-        --data-binary '{
-                        "query": "mutation {userManagementCreateGroup(createGroupOptions: {authenticationDomainId: \"{{ authentication_domain_id }}\" displayName: \"{{ client_management_group_name }}\" }) {group {displayName id}}}",
-                        "variables": ""
-                      }'
-      )
-      GROUP_ID=$(echo $CREATE_GROUP_RESPONSE | jq -r .data.userManagementCreateGroup.group.id)
-      echo $GROUP_ID
-    else
-      GROUP_ID=$(echo $CLIENT_MANAGEMENT_GROUP | jq -r .id)
-      echo $GROUP_ID
+    if [ -z "$CLIENT_ACCOUNT_METADATA" ]; then
+      echo Account associated with client {{client}} was not found!
+      exit 1
     fi
 
-  register: client_management_group_id
+    ACCOUNT_ID=$(echo $CLIENT_ACCOUNT_METADATA | jq .id)
+    echo $ACCOUNT_ID
 
-- name: Set Client Management Group Id as Fact
+  register: client_account_id
+
+- name: Set Account Id as Fact
   set_fact:
-    group_id: "{{ client_management_group_id.stdout }}"
+    account_id: "{{ client_account_id.stdout }}"
 
-- name: Add Service Account User to group 
-  delegate_to: localhost
-  shell: |
-    CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}")')
+- debug:
+    var: account_id
 
-    SERVICE_ACCOUNT_USER=$(echo $CLIENT_MANAGEMENT_GROUP | jq '.users.users.[] | select(.id == "{{ service_account_user_id }}")' )
+# get group_id
+# add service account user to client account....
 
-    if [ -z "$SERVICE_ACCOUNT_USER" ]; then
-      # Add service user to group
-      ADD_USER_RESPONSE=$(curl https://api.newrelic.com/graphql \
-        -H 'Content-Type: application/json' \
-        -H 'API-Key: {{ get_api_key_output.stdout }}' \
-        --data-binary '{
-                        "query": "mutation {userManagementAddUsersToGroups(addUsersToGroupsOptions: {groupIds: [\"{{group_id}}\"] userIds: [\"{{service_account_user_id}}\"]}) {groups {displayName id}}}",
-                        "variables": ""
-                      }'
-      )
 
-    fi
-
-# - name: Get Client License Key from SSM
+# - name: Get Client License Key
 #   delegate_to: localhost
 #   shell: |
-#     LICENSE_KEY=$(aws ssm get-parameter --name /secrets/new_relic/account_id --with-decryption --query "Parameter.Value" --output text)
+#     LICENSE_KEY=$(aws ssm get-parameter --name /secrets/new_relic/java_agent/{{client}}/license_key --with-decryption --query "Parameter.Value" --output text)
 
-#     if [ -n "$LICENSE_KEY" ]; then 
+#     if [ -z "$LICENSE_KEY" ]; then 
 #       echo "$LICENSE_KEY"
 #     else 
-#       echo License Key not found in AWS SSM
-#       echo Generating License Key for {{ client }}...
+#       echo "$LICENSE_KEY"
 #     fi
 #   register: test_output
-
-# - name: Printout put
-#   delegate_to: localhost
-#   debug:
-#     msg: "output {{ test_output.stdout }}"
