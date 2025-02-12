@@ -1,7 +1,5 @@
 - name: Set Variables
   set_fact: 
-    authentication_domain_id: 0f4dda55-888e-4f4d-abba-ac7b3417faba
-    client_management_group_name: ClientAccountManagement
     # change this to be bss dev user id (currently is Omars user id)
     service_account_user_id: 1006596928
 

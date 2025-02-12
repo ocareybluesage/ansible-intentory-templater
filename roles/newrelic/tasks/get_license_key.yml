@@ -38,10 +38,26 @@
   set_fact:
     account_id: "{{ client_account_id.stdout }}"
 
-- debug:
-    var: account_id
+- name: Get Account Management Group
+  delegate_to: localhost
+  shell: |
+    QUERY_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
+      -H 'Content-Type: application/json' \
+      -H 'API-Key: {{ get_api_key_output.stdout }}' \
+      --data-binary '{
+                      "query": "{actor {organization {userManagement {authenticationDomains(id: \"{{ authentication_domain_id }}\") {authenticationDomains {groups {groups {displayName id users {users {name id}}}}}}}}}}",
+                      "variables": ""
+                    }'
+    )
+    ACCOUNT_MANAGEMENT_GROUP_ID=$(echo $QUERY_GROUP_RESPONSE | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}") | .id')
+    echo $ACCOUNT_MANAGEMENT_GROUP_ID
+  register: client_management_group_id
 
-# get group_id
+- name: Set Group Id as Fact
+  set_fact:
+    group_id: "{{ client_management_group_id.stdout }}"
+
+
 # add service account user to client account....
 
 
@@ -56,3 +72,15 @@
 #       echo "$LICENSE_KEY"
 #     fi
 #   register: test_output
+
+
+# - debug:
+#     var: account_id
+
+
+# - name: Foo
+#   set_fact:
+#     foo: "{{ query_new_relic_groups.stdout }}"
+
+# - debug:
+#     var: group_id
