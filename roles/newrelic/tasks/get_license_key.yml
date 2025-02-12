@@ -57,9 +57,17 @@
   set_fact:
     group_id: "{{ client_management_group_id.stdout }}"
 
-
-# add service account user to client account....
-
+- name: Update Account Management Group Permissions
+  delegate_to: localhost
+  shell: |
+    UPDATE_PERMISSIONS_RESPONSE=$(curl https://api.newrelic.com/graphql \
+      -H 'Content-Type: application/json' \
+      -H 'API-Key: {{ get_api_key_output.stdout }}' \
+      --data-binary '{
+                        "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{group_id}}\" accountAccessGrants: {accountId: {{account_id}} roleId: \"{{all_product_admin_role_id}}\"}}) {roles {displayName accountId}}}",
+                        "variables": ""
+                    }'
+    )
 
 # - name: Get Client License Key
 #   delegate_to: localhost
