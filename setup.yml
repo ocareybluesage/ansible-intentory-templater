@@ -9,4 +9,3 @@
         name: newrelic
       vars:
         authentication_domain_id: 0f4dda55-888e-4f4d-abba-ac7b3417faba
-        client_management_group_name: ClientAccountManagement

@@ -1,4 +1,15 @@
-# - name: configure_client_management_account
-#   import_tasks: configure_client_management_account
+- name: Get New Relic Service Account Key
+  delegate_to: localhost
+  shell: |
+    API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text)
+    echo $API_KEY
+  register: api_key
+
+- name: Set Api Key as Fact
+  set_fact:
+    api_key: "{{ api_key.stdout }}"
+  
+- name: configure_client_management_account
+  import_tasks: configure_client_management_account.yml
 - name: get_license_key
   import_tasks: get_license_key.yml

@@ -1,21 +1,15 @@
 - name: Set Variables
   set_fact: 
-    # change this to be bss dev user id (currently is Omars user id)
-    service_account_user_id: 1006596928
-
-- name: Get New Relic Service Account Key
-  delegate_to: localhost
-  shell: |
-    API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text)
-    echo $API_KEY
-  register: get_api_key_output
+    # This is the id associated with newrelicserviceaccount@bluesageusa.com
+    service_account_user_id: 1006644413
+    client_management_group_name: ClientAccountManagement
 
 - name: Query New Relic Groups
   delegate_to: localhost
   shell: |
     QUERY_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
       -H 'Content-Type: application/json' \
-      -H 'API-Key: {{ get_api_key_output.stdout }}' \
+      -H 'API-Key: {{api_key}}' \
       --data-binary '{
                       "query": "{actor {organization {userManagement {authenticationDomains(id: \"{{ authentication_domain_id }}\") {authenticationDomains {groups {groups {displayName id users {users {name id}}}}}}}}}}",
                       "variables": ""
@@ -37,7 +31,7 @@
       # create group if does not exist
       CREATE_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
         -H 'Content-Type: application/json' \
-        -H 'API-Key: {{ get_api_key_output.stdout }}' \
+        -H 'API-Key: {{api_key}}' \
         --data-binary '{
                         "query": "mutation {userManagementCreateGroup(createGroupOptions: {authenticationDomainId: \"{{ authentication_domain_id }}\" displayName: \"{{ client_management_group_name }}\" }) {group {displayName id}}}",
                         "variables": ""
@@ -67,7 +61,7 @@
       # Add service user to group
       ADD_USER_RESPONSE=$(curl https://api.newrelic.com/graphql \
         -H 'Content-Type: application/json' \
-        -H 'API-Key: {{ get_api_key_output.stdout }}' \
+        -H 'API-Key: {{api_key}}' \
         --data-binary '{
                         "query": "mutation {userManagementAddUsersToGroups(addUsersToGroupsOptions: {groupIds: [\"{{group_id}}\"] userIds: [\"{{service_account_user_id}}\"]}) {groups {displayName id}}}",
                         "variables": ""
