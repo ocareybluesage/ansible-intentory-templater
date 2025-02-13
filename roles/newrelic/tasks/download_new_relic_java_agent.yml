@@ -18,33 +18,19 @@
 - name: Copy New Relic Artifacts to Server
   synchronize:
     src: "{{output_dir}}/newrelic"
-    dest: /opt/bin
+    dest: /opt/bin/lendingservices
     rsync_opts:
       - "--chmod=ugo+rwx"
   become: yes
 
-- name: Update License Key
-  lineinfile:
-    path: /home/ubuntu/.bashrc
-    regexp: "export NEW_RELIC_LICENSE_KEY="
-    line: "export NEW_RELIC_LICENSE_KEY={{client_license_key}}"
+- name: Set template vars
+  set_fact:
+    app_name: Test App
+    labels: hello:world;foo:bar
 
-- name: Update App Name
-  lineinfile:
-    path: /home/ubuntu/.bashrc
-    regexp: "export NEW_RELIC_APP_NAME="
-    line: "export NEW_RELIC_APP_NAME=Foo-app"
-
-- name: Update Labels
-  lineinfile:
-    path: /home/ubuntu/.bashrc
-    regexp: "export NEW_RELIC_LABELS="
-    line: "export NEW_RELIC_LABELS=hello:world;foo:bar"
-
-- name: Disable Application Logging
-  lineinfile:
-    path: /home/ubuntu/.bashrc
-    regexp: "export NEW_RELIC_APPLICATION_LOGGING_ENABLED="
-    line: "export NEW_RELIC_APPLICATION_LOGGING_ENABLED=false"
+- name: Template NewRelic Config
+  template:
+    src: ../../../templates/newrelic/newrelic.yml.j2
+    dest: '/opt/bin/lendingservices/newrelic/newrelic.yml'
 
 ##############################################################

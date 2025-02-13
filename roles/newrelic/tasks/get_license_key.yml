@@ -1,7 +1,7 @@
 - name: Set Varialbes
   set_fact:
     all_product_admin_role_id: 1254 
-    client: move
+    client: rcu
 
 - name: Get Client Account Id
   delegate_to: localhost
@@ -46,7 +46,7 @@
 - name: Get Client License Key
   delegate_to: localhost
   shell: |
-    SSM_PATH=/secrets/new_relic/apm/{{client}}/license_key
+    SSM_PATH=/secrets/{{client}}/prod/newrelic/license_key
     LICENSE_KEY=$(aws ssm get-parameter --name $SSM_PATH --with-decryption --query "Parameter.Value" --output text)
 
     if [ -z "$LICENSE_KEY" ]; then
