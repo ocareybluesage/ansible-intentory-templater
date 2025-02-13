@@ -25,14 +25,26 @@
 
 - name: Update License Key
   lineinfile:
-    path: /opt/bin/newrelic/newrelic.yml
-    regexp: "^license_key: '<%= license_key %>'"
-    line: "license_key: '{{client_license_key}}'"
+    path: /home/ubuntu/.bashrc
+    regexp: "export NEW_RELIC_LICENSE_KEY="
+    line: "export NEW_RELIC_LICENSE_KEY={{client_license_key}}"
 
-# update app_name
+- name: Update App Name
+  lineinfile:
+    path: /home/ubuntu/.bashrc
+    regexp: "export NEW_RELIC_APP_NAME="
+    line: "export NEW_RELIC_APP_NAME=Foo-app"
 
-# Add tags
+- name: Update Labels
+  lineinfile:
+    path: /home/ubuntu/.bashrc
+    regexp: "export NEW_RELIC_LABELS="
+    line: "export NEW_RELIC_LABELS=hello:world;foo:bar"
 
-# Disable automatic logging?
+- name: Disable Application Logging
+  lineinfile:
+    path: /home/ubuntu/.bashrc
+    regexp: "export NEW_RELIC_APPLICATION_LOGGING_ENABLED="
+    line: "export NEW_RELIC_APPLICATION_LOGGING_ENABLED=false"
 
 ##############################################################

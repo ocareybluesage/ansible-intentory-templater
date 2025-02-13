@@ -2,6 +2,12 @@
   delegate_to: localhost
   shell: |
     API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text)
+
+    if [ -z "$API_KEY" ]; then
+      echo Unable to read api key, are you logged in?
+      exit 1
+    fi
+
     echo $API_KEY
   register: api_key
 
