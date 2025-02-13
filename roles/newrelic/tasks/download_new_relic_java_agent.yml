@@ -1,0 +1,38 @@
+- name: Set Variables
+  set_fact:
+    java_agent_version: 7.11.1
+    output_dir: ./downloads
+
+- name: Download the new Java Agent
+  delegate_to: localhost
+  shell: |
+    wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/{{java_agent_version}}/newrelic-java.zip -O {{output_dir}}/newrelic-java.zip
+
+- name: Unzip Java Agent Download
+  delegate_to: localhost
+  shell: |
+    unzip -o {{output_dir}}/newrelic-java.zip -d {{output_dir}}
+
+# These should be per app on host right?
+##############################################################
+- name: Copy New Relic Artifacts to Server
+  synchronize:
+    src: "{{output_dir}}/newrelic"
+    dest: /opt/bin
+    rsync_opts:
+      - "--chmod=ugo+rwx"
+  become: yes
+
+- name: Update License Key
+  lineinfile:
+    path: /opt/bin/newrelic/newrelic.yml
+    regexp: "^license_key: '<%= license_key %>'"
+    line: "license_key: '{{client_license_key}}'"
+
+# update app_name
+
+# Add tags
+
+# Disable automatic logging?
+
+##############################################################

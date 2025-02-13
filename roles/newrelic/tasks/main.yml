@@ -13,3 +13,5 @@
   import_tasks: configure_client_management_account.yml
 - name: get_license_key
   import_tasks: get_license_key.yml
+- name: download_new_relic_java_agent
+  import_tasks: download_new_relic_java_agent.yml
