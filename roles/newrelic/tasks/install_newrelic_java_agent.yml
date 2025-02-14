@@ -47,3 +47,4 @@
     path: '/opt/bin/{{item}}/{{item}}.sh'
     regexp: '^#COMMONOPTS\+\=".*newrelic\.jar"$'
     line: 'COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"'
+    insertbefore: '^\$JVM'
