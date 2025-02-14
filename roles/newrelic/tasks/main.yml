@@ -4,6 +4,7 @@
 
 - name: Get New Relic Service Account Key
   delegate_to: localhost
+  run_once: true
   shell: |
     API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text)
 
@@ -16,12 +17,15 @@
   register: api_key
 
 - name: Set Api Key as Fact
+  run_once: true
   set_fact:
     api_key: "{{ api_key.stdout }}"
   
 - name: configure_client_management_account
+  run_once: true
   import_tasks: configure_client_management_account.yml
 - name: get_license_key
+  run_once: true
   import_tasks: get_license_key.yml
-- name: download_new_relic_java_agent
-  import_tasks: download_new_relic_java_agent.yml
+- name: install_newrelic_java_agent
+  import_tasks: install_newrelic_java_agent.yml

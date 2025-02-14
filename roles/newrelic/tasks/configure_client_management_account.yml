@@ -1,4 +1,4 @@
-- name: Set Variables
+- name: Set Group Config Variables
   set_fact: 
     # This is the id associated with newrelicserviceaccount@bluesageusa.com
     service_account_user_id: 1006644413
@@ -43,7 +43,6 @@
       GROUP_ID=$(echo $CLIENT_MANAGEMENT_GROUP | jq -r .id)
       echo $GROUP_ID
     fi
-
   register: client_management_group_id
 
 - name: Set Client Management Group Id as Fact
