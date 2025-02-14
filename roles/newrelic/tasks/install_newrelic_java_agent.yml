@@ -20,22 +20,22 @@
   shell: |
     unzip -o {{output_dir}}/{{ zip_file_name }} -d {{output_dir}}
 
-# - name: Copy New Relic Artifacts to Server
-#   loop: "{{ apps }}"
-#   when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
-#   synchronize:
-#     src: "{{output_dir}}/newrelic"
-#     dest: '/opt/bin/{{item}}'
-#     rsync_opts:
-#       - "--chmod=ugo+rwx"
-#   become: yes
+- name: Copy New Relic Artifacts to Server
+  loop: "{{ apps }}"
+  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  synchronize:
+    src: "{{output_dir}}/newrelic"
+    dest: '/opt/bin/{{item}}'
+    rsync_opts:
+      - "--chmod=ugo+rwx"
+  become: yes
 
-# - name: Template NewRelic Config
-#   loop: "{{ apps }}"
-#   when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
-#   template:
-#     src: ../../../templates/newrelic/newrelic.yml.j2
-#     dest: '/opt/bin/{{item}}/newrelic/newrelic.yml'
-#   vars:
-#     app_name: "{{ client }}-{{ env }}-{{ item }}-{{ inventory_hostname | split('_') | last }}"
-#     labels: app:{{item}};client:{{client}};env:{{env}}
+- name: Template NewRelic Config
+  loop: "{{ apps }}"
+  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  template:
+    src: ../../../templates/newrelic/newrelic.yml.j2
+    dest: '/opt/bin/{{item}}/newrelic/newrelic.yml'
+  vars:
+    app_name: "{{ client }}-{{ env }}-{{ item }}-{{ inventory_hostname | split('_') | last }}"
+    labels: app:{{item}};client:{{client}};env:{{env}}
