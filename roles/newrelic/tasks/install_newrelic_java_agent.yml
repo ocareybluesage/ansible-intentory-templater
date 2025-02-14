@@ -39,3 +39,11 @@
   vars:
     app_name: "{{ client }}-{{ env }}-{{ item }}-{{ inventory_hostname | split('_') | last }}"
     labels: app:{{item}};client:{{client}};env:{{env}}
+
+- name: Update Startup Script
+  loop: "{{ apps }}"
+  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  lineinfile:
+    path: '/opt/bin/{{item}}/{{item}}.sh'
+    regexp: '^#COMMONOPTS\+\=".*newrelic\.jar"$'
+    line: 'COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"'
